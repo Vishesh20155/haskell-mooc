@@ -47,19 +47,29 @@ readNames s =
 -- (NB! There are obviously other corner cases like the inputs " " and
 -- "a b c", but you don't need to worry about those here)
 split :: String -> Maybe (String,String)
-split = todo
+split s = if (elem ' ' s) then (Just ((getFirst s), (getSecond s))) else Nothing
+
+getFirst (' ':s) = []
+getFirst (c:s) = [c] ++ getFirst s
+
+getSecond (' ':s) = s
+getSecond (c:s) = getSecond s
 
 -- checkNumber should take a pair of two strings and return them
 -- unchanged if they don't contain numbers. Otherwise Nothing is
 -- returned.
 checkNumber :: (String, String) -> Maybe (String, String)
-checkNumber = todo
+checkNumber (s1, s2)
+    | any (`elem` ['0'..'9']) s1 || any (`elem` ['0'..'9']) s2 = Nothing
+    | otherwise = Just (s1, s2)
 
 -- checkCapitals should take a pair of two strings and return them
 -- unchanged if both start with a capital letter. Otherwise Nothing is
 -- returned.
 checkCapitals :: (String, String) -> Maybe (String, String)
-checkCapitals (for,sur) = todo
+checkCapitals (for, sur)
+  | isUpper (head for) && isUpper (head sur) = Just (for, sur)
+  | otherwise = Nothing
 
 ------------------------------------------------------------------------------
 -- Ex 2: Given a list of players and their scores (as [(String,Int)]),
@@ -86,7 +96,16 @@ checkCapitals (for,sur) = todo
 --     ==> Just "a"
 
 winner :: [(String,Int)] -> String -> String -> Maybe String
-winner scores player1 player2 = todo
+winner scores player1 player2 = do
+  score1 <- lookup player1 scores
+  score2 <- lookup player2 scores
+  compScore score1 score2 player1 player2
+
+compScore :: Int -> Int -> String -> String -> Maybe String
+compScore s1 s2 p1 p2 =
+  if s1 >= s2
+    then Just p1
+    else Just p2
 
 ------------------------------------------------------------------------------
 -- Ex 3: given a list of indices and a list of values, return the sum
@@ -103,8 +122,13 @@ winner scores player1 player2 = todo
 --  selectSum [0..10] [4,6,9,20]
 --    Nothing
 
+safeIndex :: [a] -> Int -> Maybe a
+safeIndex xs n
+    | n < 0 || n >= length xs = Nothing
+    | otherwise = Just (xs !! n)
+
 selectSum :: Num a => [a] -> [Int] -> Maybe a
-selectSum xs is = todo
+selectSum values = foldM (\acc idx -> (+ acc) <$> safeIndex values idx) 0
 
 ------------------------------------------------------------------------------
 -- Ex 4: Here is the Logger monad from the course material. Implement
